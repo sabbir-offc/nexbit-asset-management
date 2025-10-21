@@ -17,7 +17,9 @@ interface InvoiceItem {
 interface Invoice {
   _id: string;
   invoiceNumber: string;
-  buyer: string;
+  type: "sale" | "purchase";
+  buyer?: string;
+  seller?: string;
   items: InvoiceItem[];
   subtotal: number;
   discount: number;
@@ -70,7 +72,9 @@ export default function InvoiceDetailPage() {
 
   const {
     invoiceNumber,
+    type,
     buyer,
+    seller,
     items,
     subtotal,
     discount,
@@ -94,6 +98,13 @@ export default function InvoiceDetailPage() {
     ? "max-w-4xl mx-auto bg-white text-black p-10 border border-gray-200 shadow-none"
     : "max-w-4xl mx-auto bg-white dark:bg-neutral-900 rounded-xl shadow-md border border-gray-100 dark:border-neutral-700 transition-all duration-300";
 
+  const counterpartLabel = type === "sale" ? "Bill To" : "Supplier / Seller";
+  const counterpartValue = type === "sale" ? buyer : seller;
+  const titleColor =
+    type === "purchase"
+      ? "text-green-600 dark:text-green-400"
+      : "text-blue-600 dark:text-blue-400";
+
   return (
     <div
       className={`${
@@ -106,7 +117,7 @@ export default function InvoiceDetailPage() {
       {!isPrint && (
         <div className="flex justify-between items-center mb-6 max-w-4xl mx-auto">
           <h1 className="text-2xl font-semibold text-[var(--color-text-strong)] tracking-tight">
-            Invoice Details
+            {type === "sale" ? "Sale Invoice" : "Purchase Invoice"} Details
           </h1>
           <button
             onClick={() => window.open(`/api/invoices/${id}/pdf`, "_blank")}
@@ -136,7 +147,7 @@ export default function InvoiceDetailPage() {
               className="rounded-md object-contain"
             />
             <div>
-              <h2 className="text-2xl font-bold text-blue-600 leading-tight">
+              <h2 className={`text-2xl font-bold leading-tight ${titleColor}`}>
                 {companyName}
               </h2>
               <div className="text-sm text-gray-600 dark:text-gray-400 space-y-0.5">
@@ -167,7 +178,7 @@ export default function InvoiceDetailPage() {
         >
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-1">
-              Invoice Details
+              Invoice Info
             </h3>
             <p className="text-sm text-gray-700 dark:text-gray-300">
               <strong>No:</strong> {invoiceNumber}
@@ -177,15 +188,18 @@ export default function InvoiceDetailPage() {
               {new Date(createdAt).toLocaleDateString("en-GB")}
             </p>
             <p className="text-sm text-gray-700 dark:text-gray-300">
+              <strong>Type:</strong> {type === "sale" ? "Sale" : "Purchase"}
+            </p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">
               <strong>Payment:</strong> {paymentMethod}
             </p>
           </div>
           <div>
             <h3 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-1">
-              Bill To
+              {counterpartLabel}
             </h3>
             <p className="text-sm font-medium text-gray-800 dark:text-gray-200">
-              {buyer}
+              {counterpartValue || "-"}
             </p>
             {notes && (
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-1 italic">
@@ -263,7 +277,7 @@ export default function InvoiceDetailPage() {
               <span className="font-semibold text-gray-700 dark:text-gray-300">
                 Grand Total
               </span>
-              <span className="font-bold text-blue-600 dark:text-blue-400">
+              <span className={`font-bold ${titleColor}`}>
                 ৳ {grandTotal.toFixed(2)}
               </span>
             </div>
@@ -291,7 +305,9 @@ export default function InvoiceDetailPage() {
           }`}
         >
           <p className="text-sm text-gray-700 dark:text-gray-300">
-            Thank you for your business.
+            {type === "sale"
+              ? "Thank you for your business."
+              : "Thank you for your purchase record."}
           </p>
           <div className="mt-6 flex justify-between">
             <div>
@@ -299,7 +315,7 @@ export default function InvoiceDetailPage() {
                 ______________________________
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Maker Signature
+                Prepared By
               </p>
             </div>
             <div>
@@ -312,7 +328,8 @@ export default function InvoiceDetailPage() {
             </div>
           </div>
           <p className="mt-6 text-xs text-gray-500 dark:text-gray-400">
-            This is a system-generated invoice. Verify using the QR code above.
+            This is a system-generated {type} invoice. Verify using the QR code
+            above.
           </p>
           <p className="text-xs text-gray-500 dark:text-gray-400">
             © {new Date().getFullYear()} {companyName}. All rights reserved.

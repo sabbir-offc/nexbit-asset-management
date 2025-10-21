@@ -32,7 +32,10 @@ const fetcher = async (url: string): Promise<Asset[]> => {
 export default function NewInvoicePage() {
   const { data: assets = [] } = useSWR<Asset[]>("/api/assets", fetcher);
 
+  /* ---------- Form States ---------- */
+  const [type, setType] = useState<"sale" | "purchase">("sale");
   const [buyer, setBuyer] = useState("");
+  const [seller, setSeller] = useState("");
   const [discount, setDiscount] = useState(0);
   const [vat, setVat] = useState(0);
   const [paidAmount, setPaidAmount] = useState(0);
@@ -40,12 +43,12 @@ export default function NewInvoicePage() {
   const [notes, setNotes] = useState("");
   const [items, setItems] = useState<InvoiceItem[]>([]);
 
-  // ---------- Add item ----------
+  /* ---------- Add Item ---------- */
   function addItem(asset: Asset) {
     if (items.find((i) => i.assetId === asset._id))
       return toast.error("Item already added");
 
-    if (asset.quantity <= 0)
+    if (type === "sale" && asset.quantity <= 0)
       return toast.error(`No stock available for ${asset.name}`);
 
     setItems([
@@ -61,20 +64,19 @@ export default function NewInvoicePage() {
     ]);
   }
 
-  // ---------- Update item ----------
+  /* ---------- Update Item ---------- */
   function updateItem(index: number, field: keyof InvoiceItem, value: number) {
     const updated = [...items];
     const item = updated[index];
 
     if (field === "quantity") {
-      if (value > item.available) {
+      if (type === "sale" && value > item.available) {
         toast.error(`Only ${item.available} pcs available for ${item.name}`);
         value = item.available;
       }
       if (value < 1) value = 1;
     }
 
-    // Type guard for numeric fields
     if (field === "quantity" || field === "unitPrice") {
       updated[index][field] = value;
     }
@@ -83,46 +85,57 @@ export default function NewInvoicePage() {
     setItems(updated);
   }
 
-  // ---------- Remove item ----------
+  /* ---------- Remove Item ---------- */
   function removeItem(index: number) {
     const updated = [...items];
     updated.splice(index, 1);
     setItems(updated);
   }
 
-  // ---------- Calculations ----------
+  /* ---------- Calculations ---------- */
   const subtotal = items.reduce((s, i) => s + i.total, 0);
   const vatAmount = (subtotal * vat) / 100;
   const grandTotal = subtotal - discount + vatAmount;
   const returnedAmount = paidAmount - grandTotal;
 
-  // ---------- Submit ----------
+  /* ---------- Submit ---------- */
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!buyer.trim()) return toast.error("Enter buyer name");
+
+    // Validation
+    if (type === "sale" && !buyer.trim())
+      return toast.error("Enter buyer name");
+    if (type === "purchase" && !seller.trim())
+      return toast.error("Enter seller name");
     if (items.length === 0) return toast.error("Add at least one item");
+
+    const body = {
+      type,
+      buyer: type === "sale" ? buyer : undefined,
+      seller: type === "purchase" ? seller : undefined,
+      items,
+      subtotal,
+      discount,
+      vat,
+      grandTotal,
+      paidAmount,
+      returnedAmount,
+      paymentMethod,
+      notes,
+    };
 
     const res = await fetch("/api/invoices", {
       method: "POST",
-      body: JSON.stringify({
-        buyer,
-        items,
-        subtotal,
-        discount,
-        vat,
-        grandTotal,
-        paidAmount,
-        returnedAmount,
-        paymentMethod,
-        notes,
-      }),
       headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
     });
 
     if (res.ok) {
-      toast.success("Invoice created successfully");
+      toast.success(`${type === "sale" ? "Sale" : "Purchase"} invoice created`);
+      // Reset
       setItems([]);
       setBuyer("");
+      setSeller("");
       setNotes("");
     } else {
       const err = await res.json();
@@ -136,8 +149,7 @@ export default function NewInvoicePage() {
       <div>
         <h1 className="text-2xl font-bold">New Invoice</h1>
         <p className="text-sm text-[var(--color-muted)]">
-          Select assets and generate a professional invoice with live stock
-          control.
+          Create a sale or purchase invoice with automatic stock adjustment.
         </p>
       </div>
 
@@ -145,19 +157,45 @@ export default function NewInvoicePage() {
         onSubmit={handleSubmit}
         className="space-y-6 border border-[var(--color-border)] bg-[var(--color-card)] p-6 rounded-xl shadow-sm"
       >
-        {/* Buyer */}
+        {/* Invoice Type */}
         <div>
-          <label className="block text-sm mb-1 font-medium">
-            Buyer / Department
-          </label>
-          <input
-            type="text"
-            value={buyer}
-            onChange={(e) => setBuyer(e.target.value)}
-            placeholder="e.g., Vendor ABC"
-            className="w-full border border-[var(--color-border)] rounded-md px-3 py-2 bg-transparent focus:ring-1 focus:ring-[var(--color-accent)] outline-none text-sm"
-          />
+          <label className="block text-sm mb-1 font-medium">Invoice Type</label>
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as "sale" | "purchase")}
+            className="border border-[var(--color-border)] rounded-md px-3 py-2 bg-transparent text-sm focus:ring-1 focus:ring-[var(--color-accent)]"
+          >
+            <option value="sale">Sale Invoice (We Sell)</option>
+            <option value="purchase">Purchase Invoice (We Buy)</option>
+          </select>
         </div>
+
+        {/* Buyer or Seller */}
+        {type === "sale" ? (
+          <div>
+            <label className="block text-sm mb-1 font-medium">Buyer</label>
+            <input
+              type="text"
+              value={buyer}
+              onChange={(e) => setBuyer(e.target.value)}
+              placeholder="e.g., Department / Vendor"
+              className="w-full border border-[var(--color-border)] rounded-md px-3 py-2 bg-transparent focus:ring-1 focus:ring-[var(--color-accent)] outline-none text-sm"
+            />
+          </div>
+        ) : (
+          <div>
+            <label className="block text-sm mb-1 font-medium">
+              Seller / Vendor
+            </label>
+            <input
+              type="text"
+              value={seller}
+              onChange={(e) => setSeller(e.target.value)}
+              placeholder="e.g., TechSource BD"
+              className="w-full border border-[var(--color-border)] rounded-md px-3 py-2 bg-transparent focus:ring-1 focus:ring-[var(--color-accent)] outline-none text-sm"
+            />
+          </div>
+        )}
 
         {/* Asset Selector */}
         <div>
@@ -168,17 +206,19 @@ export default function NewInvoicePage() {
                 key={a._id}
                 type="button"
                 onClick={() => addItem(a)}
-                disabled={a.quantity <= 0}
+                disabled={type === "sale" && a.quantity <= 0}
                 className={`text-sm px-3 py-1 border rounded-md transition ${
-                  a.quantity <= 0
+                  type === "sale" && a.quantity <= 0
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-[color-mix(in srgb, var(--color-accent) 10%, transparent)]"
                 }`}
               >
                 {a.name}{" "}
-                <span className="text-xs text-gray-500">
-                  ({a.quantity} pcs)
-                </span>
+                {type === "sale" && (
+                  <span className="text-xs text-gray-500">
+                    ({a.quantity} pcs)
+                  </span>
+                )}
               </button>
             ))}
           </div>
@@ -191,7 +231,9 @@ export default function NewInvoicePage() {
               <thead className="bg-[color-mix(in srgb, var(--color-accent) 5%, transparent)] text-left">
                 <tr>
                   <th className="px-3 py-2">Item</th>
-                  <th className="px-3 py-2 text-right">Available</th>
+                  {type === "sale" && (
+                    <th className="px-3 py-2 text-right">Available</th>
+                  )}
                   <th className="px-3 py-2 text-right">Qty</th>
                   <th className="px-3 py-2 text-right">Unit</th>
                   <th className="px-3 py-2 text-right">Total</th>
@@ -205,15 +247,16 @@ export default function NewInvoicePage() {
                     className="border-t border-[var(--color-border)] hover:bg-[color-mix(in srgb, var(--color-accent) 6%, transparent)] transition"
                   >
                     <td className="px-3 py-2">{i.name}</td>
-                    <td className="px-3 py-2 text-right text-gray-500">
-                      {i.available}
-                    </td>
+                    {type === "sale" && (
+                      <td className="px-3 py-2 text-right text-gray-500">
+                        {i.available}
+                      </td>
+                    )}
                     <td className="px-3 py-2 text-right">
                       <input
                         type="number"
                         value={i.quantity}
                         min={1}
-                        max={i.available}
                         onChange={(e) =>
                           updateItem(idx, "quantity", parseInt(e.target.value))
                         }
@@ -308,7 +351,7 @@ export default function NewInvoicePage() {
             <option value="cash">Cash</option>
             <option value="bank">Bank</option>
             <option value="digital">Digital</option>
-            <option value="mutual">Mutual</option>
+            <option value="credit">Credit</option>
           </select>
 
           <input
