@@ -1,5 +1,6 @@
 /* ===== Tailwind v4+ Configless ===== */
 @import "tailwindcss";
+@import "react-datepicker/dist/react-datepicker.css";
 
 /* ===== Root Theme Colors ===== */
 :root {

@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     await db;
     const data = await req.json();
 
+    // ✅ Basic validation
     if (!data.name || !data.category) {
       return NextResponse.json(
         { error: "Name and category are required" },
@@ -35,10 +36,38 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Prevent duplicate name + category
-    const exists = await Asset.findOne({
+    // ✅ Category validation
+    const allowedCategories = [
+      "Electronics",
+      "Furniture",
+      "Kitchen Accessories",
+      "Others",
+    ];
+    if (!allowedCategories.includes(data.category)) {
+      return NextResponse.json(
+        { error: "Invalid category value" },
+        { status: 400 }
+      );
+    }
+
+    // ✅ Optional fields (sanitization)
+    const assetData = {
       name: data.name,
       category: data.category,
+      serial: data.serial || "",
+      purchaseDate: data.purchaseDate ? new Date(data.purchaseDate) : null,
+      unitPrice: Number(data.unitPrice) || 0,
+      quantity: Number(data.quantity) || 0,
+      supplier: data.supplier || "",
+      status: data.status || "in stock",
+      location: data.location || "",
+      imageUrl: data.imageUrl || "",
+    };
+
+    // Prevent duplicate (same name + category)
+    const exists = await Asset.findOne({
+      name: assetData.name,
+      category: assetData.category,
     });
     if (exists) {
       return NextResponse.json(
@@ -47,9 +76,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const created = await Asset.create(data);
+    const created = await Asset.create(assetData);
 
-    // Log movement
+    // 🧾 Log movement
     await Movement.create({
       assetId: created._id,
       assetName: created.name,

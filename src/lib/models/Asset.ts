@@ -3,19 +3,35 @@ import { Schema, model, models } from "mongoose";
 const AssetSchema = new Schema(
   {
     name: { type: String, required: true },
-    category: { type: String, required: true },
-    serial: String,
-    purchaseDate: Date,
+
+    // ✅ Fixed category options
+    category: {
+      type: String,
+      enum: ["Electronics", "Furniture", "Kitchen Accessories", "Others"],
+      required: true,
+    },
+
+    // Optional unique serial number per asset
+    serial: { type: String },
+
+    // ✅ Purchase date field
+    purchaseDate: { type: Date },
+
+    // Pricing & stock
     unitPrice: { type: Number, default: 0 },
     quantity: { type: Number, default: 0 },
-    supplier: String,
+    supplier: { type: String },
+
+    // ✅ Stock status
     status: {
       type: String,
       enum: ["in stock", "issued", "moved outside", "lost", "under repair"],
       default: "in stock",
     },
-    location: String,
-    imageUrl: String,
+
+    // Optional metadata
+    location: { type: String },
+    imageUrl: { type: String },
   },
   { timestamps: true }
 );

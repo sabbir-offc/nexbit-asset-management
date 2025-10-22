@@ -34,6 +34,26 @@ export async function PATCH(
   if (!existing)
     return NextResponse.json({ error: "Not found" }, { status: 404 });
 
+  // ✅ sanitize and validate category
+  if (updates.category) {
+    const allowedCategories = [
+      "Electronics",
+      "Furniture",
+      "Kitchen Accessories",
+      "Others",
+    ];
+    if (!allowedCategories.includes(updates.category)) {
+      return NextResponse.json(
+        { error: "Invalid category value" },
+        { status: 400 }
+      );
+    }
+  }
+
+  // ✅ sanitize purchaseDate
+  if (updates.purchaseDate)
+    updates.purchaseDate = new Date(updates.purchaseDate);
+
   const updated = await Asset.findByIdAndUpdate(id, updates, { new: true });
 
   // 🧩 Determine quantity change
