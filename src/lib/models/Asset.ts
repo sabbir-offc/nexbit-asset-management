@@ -7,7 +7,13 @@ const AssetSchema = new Schema(
     // ✅ Fixed category options
     category: {
       type: String,
-      enum: ["Electronics", "Furniture", "Kitchen Accessories", "Others"],
+      enum: [
+        "Electronics",
+        "Furniture",
+        "Kitchen Accessories",
+        "Interior",
+        "Others",
+      ],
       required: true,
     },
 

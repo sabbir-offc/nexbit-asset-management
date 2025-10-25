@@ -276,6 +276,7 @@ export default function AssetsPage() {
                   <option value="Kitchen Accessories">
                     Kitchen Accessories
                   </option>
+                  <option value="Interior">Interior</option>
                   <option value="Others">Others</option>
                 </select>
               </div>
