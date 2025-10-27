@@ -73,8 +73,8 @@ export default function AssetsPage() {
     "Kitchen Accessories": filteredAssets.filter(
       (a) => a.category === "Kitchen Accessories"
     ),
-    Others: filteredAssets.filter((a) => a.category === "Interior"),
-    Interior: filteredAssets.filter((a) => a.category === "Others"),
+    Interior: filteredAssets.filter((a) => a.category === "Interior"), // ✅ correct
+    Others: filteredAssets.filter((a) => a.category === "Others"), // ✅ correct
   };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
