@@ -73,7 +73,8 @@ export default function AssetsPage() {
     "Kitchen Accessories": filteredAssets.filter(
       (a) => a.category === "Kitchen Accessories"
     ),
-    Others: filteredAssets.filter((a) => a.category === "Others"),
+    Others: filteredAssets.filter((a) => a.category === "Interior"),
+    Interior: filteredAssets.filter((a) => a.category === "Others"),
   };
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -244,6 +245,7 @@ export default function AssetsPage() {
       {renderTable("Electronics", groupedAssets.Electronics)}
       {renderTable("Furniture", groupedAssets.Furniture)}
       {renderTable("Kitchen Accessories", groupedAssets["Kitchen Accessories"])}
+      {renderTable("Interior", groupedAssets.Interior)}
       {renderTable("Others", groupedAssets.Others)}
 
       {/* ===== Modal ===== */}

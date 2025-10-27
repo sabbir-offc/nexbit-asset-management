@@ -41,6 +41,7 @@ export async function POST(req: NextRequest) {
       "Electronics",
       "Furniture",
       "Kitchen Accessories",
+      "Interior",
       "Others",
     ];
     if (!allowedCategories.includes(data.category)) {
