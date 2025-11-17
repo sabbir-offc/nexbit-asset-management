@@ -40,6 +40,7 @@ export async function PATCH(
       "Electronics",
       "Furniture",
       "Kitchen Accessories",
+      "Interior",
       "Others",
     ];
     if (!allowedCategories.includes(updates.category)) {
