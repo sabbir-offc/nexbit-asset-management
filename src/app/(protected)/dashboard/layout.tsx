@@ -50,7 +50,8 @@ export default async function DashboardLayout({
 
             {/* Footer note */}
             <div className="mt-auto p-3 text-xs text-[var(--color-muted)] border-t border-[var(--color-border)]">
-              © {new Date().getFullYear()} NeXbit Ltd.
+              © {new Date().getFullYear()}{" "}
+              {process.env.NEXT_PUBLIC_COMPANY_NAME}
             </div>
           </aside>
 

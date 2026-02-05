@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 export const metadata = {
-  title: "Verify Invoice | NeXbit Ltd.",
+  title: `Verify Invoice | ${process.env.NEXT_PUBLIC_COMPANY_NAME}`,
 };
 
 export default async function VerifyInvoicePage({
@@ -16,7 +16,7 @@ export default async function VerifyInvoicePage({
     `${baseUrl}/api/invoices/verify/${params.invoiceNumber}`,
     {
       cache: "no-store",
-    }
+    },
   );
 
   if (!res.ok) {
@@ -54,7 +54,8 @@ export default async function VerifyInvoicePage({
               {params.invoiceNumber}
             </p>
             <p className="text-gray-500 dark:text-gray-400">
-              Please verify the QR code source or contact NeXbit Ltd.
+              Please verify the QR code source or contact{" "}
+              {process.env.NEXT_PUBLIC_COMPANY_NAME}
             </p>
           </div>
 
@@ -66,7 +67,8 @@ export default async function VerifyInvoicePage({
           </Link>
 
           <p className="text-xs text-gray-500 dark:text-gray-500 mt-6">
-            © {new Date().getFullYear()} NeXbit Ltd. All rights reserved.
+            © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_COMPANY_NAME}{" "}
+            All rights reserved.
           </p>
         </div>
       </div>
@@ -97,7 +99,8 @@ export default async function VerifyInvoicePage({
             Verified Invoice
           </h1>
           <p className="text-gray-500 dark:text-gray-400 text-sm">
-            This invoice is verified and issued by NeXbit Ltd.
+            This invoice is verified and issued by{" "}
+            {process.env.NEXT_PUBLIC_COMPANY_NAME}.
           </p>
         </div>
 
@@ -136,7 +139,8 @@ export default async function VerifyInvoicePage({
         </a>
 
         <p className="text-xs text-gray-500 dark:text-gray-500 mt-6">
-          © {new Date().getFullYear()} NeXbit Ltd. All rights reserved.
+          © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_COMPANY_NAME}.
+          All rights reserved.
         </p>
       </div>
     </div>

@@ -84,7 +84,8 @@ export default function LoginPage() {
 
         {/* ===== Footer ===== */}
         <p className="text-xs text-center text-[var(--color-muted)] mt-6">
-          © {new Date().getFullYear()} NeXbit Ltd. All rights reserved.
+          © {new Date().getFullYear()} {process.env.NEXT_PUBLIC_COMPANY_NAME}{" "}
+          All rights reserved.
         </p>
       </div>
     </div>

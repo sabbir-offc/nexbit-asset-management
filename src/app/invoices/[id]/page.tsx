@@ -87,7 +87,7 @@ export default function InvoiceDetailPage() {
     createdAt,
   } = invoice;
 
-  const companyName = process.env.COMPANY_NAME || "NeXbit Ltd.";
+  const companyName = process.env.NEXT_PUBLIC_COMPANY_NAME;
   const companyAddress =
     "Level 6, House 35, Gausul Azam Ave, Sector 14, Uttara, Dhaka - 1230";
   const companyLogo =

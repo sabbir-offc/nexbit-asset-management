@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "NeXbit Assets Inventory System",
+  title: `${process.env.NEXT_PUBLIC_COMPANY_NAME} Assets Inventory System`,
   description: "Created By Sabbir H.",
 };
 
