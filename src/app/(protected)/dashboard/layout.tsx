@@ -26,7 +26,7 @@ export default async function DashboardLayout({
             {/* Logo/Header */}
             <div className="p-4 text-lg font-semibold border-b border-[var(--color-border)] text-[var(--color-foreground)] flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-[var(--color-accent)]"></span>
-              <span>Assets Admin</span>
+              <span>Linfo LLC</span>
             </div>
 
             {/* Navigation */}
